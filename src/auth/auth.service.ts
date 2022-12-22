@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateUserDto } from './dto';
+import { AuthDto, CreateUserDto } from './dto';
 import * as argon2 from 'argon2';
 import { Tokens } from './types';
 import { JwtService } from '@nestjs/jwt';
+import { ForbiddenException } from '@nestjs/common/exceptions';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +27,30 @@ export class AuthService {
     return tokens;
   }
 
-  signinLocal() {}
+  async signinLocal(dto: AuthDto): Promise<Tokens> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+
+    if (!user) {
+      throw new ForbiddenException('Access Denied');
+    }
+
+    const passwordMatches = await argon2.verify(user.hash, dto.password);
+
+    if (!passwordMatches) {
+      throw new ForbiddenException('Access Denied');
+    }
+
+    const tokens = await this.getTokens(user.id, user.email);
+
+    await this.updateRefreshTokenHash(user.id, tokens.refresh_token);
+
+    return tokens;
+  }
+
   logout() {}
   refreshTokens() {}
 
