@@ -72,7 +72,7 @@ export class AuthService {
       },
     });
 
-    if (!user) {
+    if (!user || !user.hashedRT) {
       throw new ForbiddenException('Access Denied');
     }
 
@@ -102,7 +102,7 @@ export class AuthService {
         },
         {
           secret: process.env.ACCESS_TOKEN_SECRET,
-          expiresIn: 60 * 15, // 15min
+          expiresIn: '15min', // 15min
         },
       ),
       this.jwtService.signAsync(
@@ -112,7 +112,7 @@ export class AuthService {
         },
         {
           secret: process.env.REFRESH_TOKEN_SECRET,
-          expiresIn: 60 * 60 * 24 * 7, // 7d
+          expiresIn: '7d', // 7d
         },
       ),
     ]);

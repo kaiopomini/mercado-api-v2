@@ -5,11 +5,13 @@ import {
   HttpStatus,
   Post,
   UseGuards,
-  Req,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { GetCurrentUser, GetCurrentUserId } from 'src/common/decorators';
-import { AccessTokenGuard, RefreshTokenGuard } from 'src/common/guards';
+import {
+  GetCurrentUser,
+  GetCurrentUserId,
+  Public,
+} from 'src/common/decorators';
+import { RefreshTokenGuard } from 'src/common/guards';
 import { AuthService } from './auth.service';
 import { AuthDto, CreateUserDto } from './dto';
 import { Tokens } from './types';
@@ -18,25 +20,27 @@ import { Tokens } from './types';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @Post('local/signup')
   @HttpCode(HttpStatus.CREATED)
   signupLocal(@Body() dto: CreateUserDto): Promise<Tokens> {
     return this.authService.signupLocal(dto);
   }
 
+  @Public()
   @Post('local/signin')
   @HttpCode(HttpStatus.OK)
   signinLocal(@Body() dto: AuthDto): Promise<Tokens> {
     return this.authService.signinLocal(dto);
   }
 
-  @UseGuards(AccessTokenGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   logout(@GetCurrentUserId() userId: string) {
     return this.authService.logout(userId);
   }
 
+  @Public() // To avoid AccessTokenGuard and then use RefreshTokenGuard
   @UseGuards(RefreshTokenGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
