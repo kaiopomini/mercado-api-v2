@@ -18,7 +18,7 @@ model User {
   hash           String
   hashedRT       String?
   profile        Profile?
-  roles          Role      @default(USER)
+  role           Role      @default(USER)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   deletedAt      DateTime?
