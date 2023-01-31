@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 
 export class FindAllParams {
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @Transform(({ value }) => Number.parseInt(value))
   @IsNumber()
   @IsInt()
@@ -18,7 +18,7 @@ export class FindAllParams {
   @IsOptional()
   page: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @Transform(({ value }) => Number.parseInt(value))
   @IsNumber()
   @IsInt()
@@ -26,17 +26,17 @@ export class FindAllParams {
   @IsOptional()
   perPage: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
   search: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsEnum(['name', 'createdAt', 'updatedAt', 'price'])
   @IsOptional()
   orderBy: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsEnum(['asc', 'desc'])
   @IsOptional()
   sort: string;
