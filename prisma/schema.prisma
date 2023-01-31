@@ -86,7 +86,7 @@ model Product {
   controlledInventory Boolean
   image               String?
   active              Boolean
-  barcode             String
+  barcode             String                 @unique
   createdAt           DateTime               @default(now())
   updatedAt           DateTime               @updatedAt
   deletedAt           DateTime?
