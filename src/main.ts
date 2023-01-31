@@ -5,7 +5,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const config = new DocumentBuilder()
     .setTitle('Documentação - Mercado api')
@@ -37,6 +37,8 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
+  app.enableCors();
 
   await app.listen(3333);
 }
