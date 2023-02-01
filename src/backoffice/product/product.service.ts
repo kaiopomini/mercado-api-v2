@@ -37,7 +37,7 @@ export class ProductService {
       },
     });
 
-    return newProduct;
+    return { data: newProduct };
   }
 
   async findAll(params: FindAllParams) {
@@ -118,7 +118,7 @@ export class ProductService {
 
     const lastPage = Math.ceil(total / perPage) || 1;
     const data = {
-      result: products,
+      data: products,
       meta: {
         total,
         page,
@@ -139,7 +139,7 @@ export class ProductService {
       throw new NotFoundException();
     }
 
-    return product;
+    return { data: product };
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
@@ -153,6 +153,15 @@ export class ProductService {
       throw new BadRequestException('Product barcode already exists');
     }
 
+    const product = await this.prisma.product.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (!product) {
+      throw new NotFoundException();
+    }
+
     const updateProduct = await this.prisma.product.update({
       where: {
         id: id,
@@ -162,7 +171,7 @@ export class ProductService {
       },
     });
 
-    return updateProduct;
+    return { data: updateProduct };
   }
 
   async remove(id: string) {

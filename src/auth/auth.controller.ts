@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Post,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
@@ -13,9 +14,10 @@ import {
   Public,
 } from 'src/common/decorators';
 import { RefreshTokenGuard } from 'src/common/guards';
+import { FormatResponseInterceptor } from 'src/common/interceptors/format-response.interceptor';
 import { AuthService } from './auth.service';
 import { AuthDto, CreateUserDto } from './dto';
-import { Tokens } from './types';
+
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -23,20 +25,23 @@ export class AuthController {
 
   @Post('local/signup')
   @Public()
+  @UseInterceptors(FormatResponseInterceptor)
   @HttpCode(HttpStatus.CREATED)
-  signupLocal(@Body() dto: CreateUserDto): Promise<Tokens> {
+  signupLocal(@Body() dto: CreateUserDto) {
     return this.authService.signupLocal(dto);
   }
 
   @Post('local/signin')
   @Public()
+  @UseInterceptors(FormatResponseInterceptor)
   @HttpCode(HttpStatus.OK)
-  signinLocal(@Body() dto: AuthDto): Promise<Tokens> {
+  signinLocal(@Body() dto: AuthDto) {
     return this.authService.signinLocal(dto);
   }
 
   @Post('logout')
   @ApiBearerAuth('access-token')
+  @UseInterceptors(FormatResponseInterceptor)
   @HttpCode(HttpStatus.OK)
   logout(@GetCurrentUserId() userId: string) {
     return this.authService.logout(userId);
@@ -46,11 +51,12 @@ export class AuthController {
   @Public() // To avoid AccessTokenGuard and then use RefreshTokenGuard
   @ApiBearerAuth('refresh-token')
   @UseGuards(RefreshTokenGuard)
+  @UseInterceptors(FormatResponseInterceptor)
   @HttpCode(HttpStatus.OK)
   refreshTokens(
     @GetCurrentUserId() userId: string,
     @GetCurrentUser('refreshToken') refreshToken: string,
-  ): Promise<Tokens> {
+  ) {
     return this.authService.refreshTokens(userId, refreshToken);
   }
 }

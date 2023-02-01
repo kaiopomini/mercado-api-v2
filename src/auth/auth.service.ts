@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto, CreateUserDto } from './dto';
 import * as argon2 from 'argon2';
-import { Tokens } from './types';
 import { JwtService } from '@nestjs/jwt';
 import { ForbiddenException } from '@nestjs/common/exceptions';
 
@@ -10,7 +9,7 @@ import { ForbiddenException } from '@nestjs/common/exceptions';
 export class AuthService {
   constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
-  async signupLocal(dto: CreateUserDto): Promise<Tokens> {
+  async signupLocal(dto: CreateUserDto) {
     const hash = await this.hashData(dto.password);
     const newUser = await this.prisma.user.create({
       data: {
@@ -22,12 +21,12 @@ export class AuthService {
 
     const tokens = await this.getTokens(newUser.id, newUser.email);
 
-    await this.updateRefreshTokenHash(newUser.id, tokens.refresh_token);
+    await this.updateRefreshTokenHash(newUser.id, tokens.refreshToken);
 
-    return tokens;
+    return { data: tokens };
   }
 
-  async signinLocal(dto: AuthDto): Promise<Tokens> {
+  async signinLocal(dto: AuthDto) {
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -46,9 +45,9 @@ export class AuthService {
 
     const tokens = await this.getTokens(user.id, user.email);
 
-    await this.updateRefreshTokenHash(user.id, tokens.refresh_token);
+    await this.updateRefreshTokenHash(user.id, tokens.refreshToken);
 
-    return tokens;
+    return { data: tokens };
   }
 
   async logout(userId: string) {
@@ -65,7 +64,7 @@ export class AuthService {
     });
   }
 
-  async refreshTokens(userId: string, refreshToken: string): Promise<Tokens> {
+  async refreshTokens(userId: string, refreshToken: string) {
     const user = await this.prisma.user.findUnique({
       where: {
         id: userId,
@@ -84,9 +83,9 @@ export class AuthService {
 
     const tokens = await this.getTokens(user.id, user.email);
 
-    await this.updateRefreshTokenHash(user.id, tokens.refresh_token);
+    await this.updateRefreshTokenHash(user.id, tokens.refreshToken);
 
-    return tokens;
+    return { data: tokens };
   }
 
   hashData(data: string) {
@@ -118,8 +117,8 @@ export class AuthService {
     ]);
 
     return {
-      access_token: at,
-      refresh_token: rt,
+      accessToken: at,
+      refreshToken: rt,
     };
   }
 
